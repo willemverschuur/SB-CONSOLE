@@ -8,6 +8,7 @@ import java.lang.*;
 import java.math.*;
 import java.lang.Class;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -45,7 +46,6 @@ class ModelField extends JSONObject {
         if (this.has("default"))
         {
             df = String.format("DEFAULT %s", this.get("default"));
-            System.out.printf("default for %s : %s", field, df);
         }
 
         // type transformations
@@ -64,6 +64,7 @@ public class Model extends JSONObject {
 
         super(json);
 
+        MODELS.instance().registerModel(this);
     }
 
 
@@ -74,6 +75,7 @@ public class Model extends JSONObject {
         this.put("title", title);
         this.put("audited", audited);
         this.put("fields", new JSONObject());
+        this.put("indexes", new JSONObject());
 
         // add audit fields for audited tables, these are populated automatically
         // and values are inserted into audit_row table
@@ -81,6 +83,8 @@ public class Model extends JSONObject {
         this.addField("_owner", "uuid", "Creator");
         this.addField("_created", "timestamp", "Created");
         this.addField("_track", "uuid", "Track");
+
+        MODELS.instance().registerModel(this);
     }
 
 
@@ -94,12 +98,26 @@ public class Model extends JSONObject {
     }
 
 
-    String sql() 
-    {
+    ModelField addField(String field, String type) {
+
+        return this.addField(field, type, "");
+    }
+
+
+    void addIndex(String indexname, JSONArray fields) {
+
+        JSONObject indexes = (JSONObject) this.get("indexes");
+        indexes.put(indexname, fields);
+
+        this.put("indexes", indexes);
+    }
+
+
+    String sql() {
+
         String table = this.getString("table");
         JSONObject fields = (JSONObject) this.get("fields");
         String[] fieldnames = JSONObject.getNames(fields);
-        int fieldcount = fieldnames.length;
         ArrayList<String> fieldsql = new ArrayList<String>();
 
         for (String fieldname : fieldnames)
@@ -108,8 +126,11 @@ public class Model extends JSONObject {
             fieldsql.add(props.sql());
         }
 
-        return String.format("CREATE TABLE %s (%s)", table, String.join(",", fieldsql));
+        return String.format("CREATE TABLE IF NOT EXISTS %s (%s)", table, String.join(",", fieldsql));
+        
     }
     
 
 }
+
+

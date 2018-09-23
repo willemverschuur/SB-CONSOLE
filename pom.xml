@@ -21,12 +21,19 @@
 
   <dependencies>
 
-  <!-- https://mvnrepository.com/artifact/org.json/json -->
-  <dependency>
-  <groupId>org.json</groupId>
-  <artifactId>json</artifactId>
-  <version>20180813</version>
-  </dependency>
+      <!-- https://mvnrepository.com/artifact/org.json/json -->
+      <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20180813</version>
+      </dependency>
+
+      <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+      <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.2.5</version>
+      </dependency>
 
   </dependencies>
 
@@ -40,6 +47,7 @@
   <target>1.8</target> 
   </configuration>
   </plugin>
+
 
   <!-- any other plugins -->
   <plugin>
@@ -63,22 +71,6 @@
   </descriptorRefs>
   </configuration>
   </plugin>
-
-  <!-- Build an executable JAR -->
-  <!--
-  <plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-jar-plugin</artifactId>
-  <version>2.4</version>
-  <configuration>
-  <archive>
-  <manifest>
-  <mainClass>com.skillzbookcollege.App</mainClass>
-  </manifest>
-  </archive>
-  </configuration>
-  </plugin>
-  -->
 
 
   </plugins>
