@@ -42,7 +42,7 @@ class models_auth_user extends Model {
         this.addField("name", "text", "Name").flag("notnull");
         this.addField("telno", "text", "Tel#").flag("notnull");
         this.addField("groups", "text", "Groups");
-        this.addField("supeuser", "bool", "Superuser").put("default", false);
+        this.addField("superuser", "bool", "Superuser").put("default", false);
     }
 } 
 
@@ -196,12 +196,13 @@ class MODELS extends JSONObject {
     }
 
 
-    public Model getModel(String modelname)
+    public Model model(String modelname)
     {
         return (Model) super.get(modelname);
     }
 
 
+    /* 
     public void updateDB() throws Exception
     {
         DB db = DB.instance();
@@ -217,7 +218,7 @@ class MODELS extends JSONObject {
         }
 
         system.out.printf("\n\n\n");
-    }
+    }*/
 
 }
 
