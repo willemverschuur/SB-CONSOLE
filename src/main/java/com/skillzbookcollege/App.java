@@ -51,32 +51,31 @@ public class App
 
             //MODELS.instance().updateDB();
 
-            ModelObject user = MODELS.instance().model("auth_user").insert();
+            ModelObject user = MODELS.instance().model("auth_user").selectValue("email", "will@edian.co.za");
+            if (user == null)
+            {
+                System.out.println("user found");
+                user = MODELS.instance().model("auth_user").insert();
+                user
+                    .val("email", "will@edian.co.za")
+                    .val("password", "asdf")
+                    .val("superuser", true);
+                    
+                user.commit();
+                System.out.println("user created");
 
-            user.val("email", "will@edian.co.za");
-            user.val("password", "asdf");
-            user.commit();
+                
+            }
+            else
+            {
+                System.out.println("\n\nthis is updating an existing object");
+                user.val("groups", "[\"everything\"]");
+                user.commit();
+                System.out.println("user found");
+                
+            }
 
-
-
-            /*
-            Connection db = DB.instance();
-            PreparedStatement insertuser = db.prepareStatement("INSERT INTO auth_user (_id, _created, email, name, password, active, superuser, telno, groups) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    
-            insertuser.setObject(1, UUID.randomUUID());
-            insertuser.setTimestamp(2, new Timestamp(new Date().getTime()));
-            insertuser.setString(3, email);
-            insertuser.setString(4, name);
-            insertuser.setString(5, Hashing.sha256().hashString(password, StandardCharsets.UTF_8) .toString());
-            insertuser.setBoolean(6, true);
-            insertuser.setBoolean(7, true);
-            insertuser.setString(8, telno);
-            insertuser.setString(9, groups);
-            insertuser.execute();   
-            */
-
-            //System.out.println(user.toString());
-
+          
         } catch (Exception e) {
 
             System.out.printf("Error occured " + e.getMessage());

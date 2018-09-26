@@ -24,6 +24,10 @@ public class ModelObject extends JSONObject {
 
         this._exists = false;
         this._model = model;
+
+        this.put("_id", UUID.randomUUID().toString());
+        this.put("_created", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()));
+
     }
 
 
@@ -31,10 +35,6 @@ public class ModelObject extends JSONObject {
 
         this._exists = true;
         this._model = model;
-
-        this.put("_id", UUID.randomUUID().toString());
-        this.put("_created", new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date()));
-
     }
 
 
@@ -46,7 +46,7 @@ public class ModelObject extends JSONObject {
 
 
     void commit() throws Exception {
-        
+
         Connection db = DB.instance();
         PreparedStatement statement;
 
@@ -57,8 +57,8 @@ public class ModelObject extends JSONObject {
         ArrayList<Object> values = new ArrayList();
 
 
-        if (!this._exists)
-        {
+        if (!this._exists) {
+
             for (String field : JSONObject.getNames(this))
             {
                 ModelField props = this._model.props(field);
@@ -73,32 +73,43 @@ public class ModelObject extends JSONObject {
         }
 
 
-        else if (this._exists)
-        {
+        else if (this._exists) {
+
+            ArrayList<String> set = new ArrayList();
+
+
             for (String field : this._changes)
             {
                 ModelField props = this._model.props(field);
-
-                fields.add(String.format("%s=?", field));
-                qs.add("?");
+      
+                fields.add(field);
+                set.add(String.format("%s=?", field));
                 values.add(this.get(field));
 
             }
 
-            sql = String.format("UPDATE %s SET %s WHERE _id = ?", tablename, String.join(", ", fields));
-            // push _id onto values
+            sql = String.format("UPDATE %s SET %s WHERE _id = ?", tablename, String.join(", ", set));            
+            System.out.println(sql);
+
+            
+            fields.add("_id");
+            values.add(this.get("_id"));
         }
 
 
         statement = db.prepareStatement(sql);
-
+        System.out.printf("\n assemble values");
+        
 
         int idx = 0;
         for (Object value : values)
         {
             String field = fields.get(idx);
+            System.out.printf(" %s %s %s", tablename, field, value);
+
             ModelField props = this._model.props(field);
             String type = props.getString("type");
+
 
 
             if (type == "timestamp") {
@@ -112,7 +123,7 @@ public class ModelObject extends JSONObject {
 
             else if (type == "uuid") {
 
-                statement.setObject(idx+1, UUID.fromString((String) value));
+                statement.setObject(idx+1, value);
             }
 
             else{ 
@@ -124,8 +135,7 @@ public class ModelObject extends JSONObject {
         }
 
 
-        statement.execute();
-        
+        statement.execute();        
     }
 
 }

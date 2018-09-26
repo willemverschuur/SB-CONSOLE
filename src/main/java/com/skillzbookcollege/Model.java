@@ -4,8 +4,11 @@ package com.skillzbookcollege;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.*;
 
+import java.sql.*;
 import java.lang.*;
 import java.math.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.lang.Class;
 import java.util.ArrayList;
@@ -106,7 +109,71 @@ public class Model extends JSONObject {
 
         return o;
     }
-    
+
+
+    ModelObject selectId(String id) throws Exception
+    {
+        String table = this.getString("table");
+        String sql = String.format("SELECT * FROM %s WHERE _id = ?", table, id);
+
+        Connection db = DB.instance();
+        PreparedStatement statement = db.prepareStatement(sql);
+
+        statement.setObject(1, UUID.fromString((id)));
+
+        ResultSet rc = statement.executeQuery();
+        if (!rc.next()) return null;
+
+        ResultSetMetaData meta = rc.getMetaData();
+        ModelObject o = new ModelObject(this, rc);
+
+        for (int col = 1; col <= meta.getColumnCount(); col++) 
+        {
+            String label = meta.getColumnLabel(col);
+            o.put(label, rc.getObject(col));
+        }
+        return o;
+    }
+
+
+    ModelObject selectValue(String field, String value) throws Exception
+    {
+        ModelField props = this.props(field);
+        String type = props.getString("type");
+        JSONObject fields = (JSONObject) this.get("fields");
+        String table = this.getString("table");
+        String sql = String.format("SELECT * FROM %s WHERE %s = ?", table, field);
+        System.out.println(sql);
+
+        Connection db = DB.instance();
+        PreparedStatement statement = db.prepareStatement(sql);
+
+
+        if (type == "uuid")
+        {
+
+        }
+        else
+        {
+            statement.setObject(1, value);
+        }
+
+        ResultSet rc = statement.executeQuery();
+        if (!rc.next()) return null;
+
+        ResultSetMetaData meta = rc.getMetaData();
+        ModelObject o = new ModelObject(this, rc);
+
+        for (int col = 1; col <= meta.getColumnCount(); col++) 
+        {
+            String label = meta.getColumnLabel(col);
+            o.put(label, rc.getObject(col));
+        }
+
+        System.out.printf("done with selectValue %s", value);
+        return o;
+    }
+
 
 }
 
